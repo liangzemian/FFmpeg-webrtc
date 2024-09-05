@@ -101,7 +101,8 @@ static int split_tag_value(char **tag, char **value, char *line)
 static int parse_multipart_header(AVIOContext *pb,
                                     int* size,
                                     const char* expected_boundary,
-                                    void *log_ctx);
+                                    void *log_ctx,
+                                    int* pts);
 
 static int mpjpeg_read_close(AVFormatContext *s)
 {
@@ -116,6 +117,7 @@ static int mpjpeg_read_probe(AVProbeData *p)
     AVIOContext *pb;
     int ret = 0;
     int size = 0;
+    int pts = 0;
 
     if (p->buf_size < 2 || p->buf[0] != '-' || p->buf[1] != '-')
         return 0;
@@ -124,7 +126,7 @@ static int mpjpeg_read_probe(AVProbeData *p)
     if (!pb)
         return 0;
 
-    ret = (parse_multipart_header(pb, &size, "--", NULL) >= 0) ? AVPROBE_SCORE_MAX : 0;
+    ret = (parse_multipart_header(pb, &size, "--", NULL, &pts) >= 0) ? AVPROBE_SCORE_MAX : 0;
 
     avio_context_free(&pb);
 
@@ -175,7 +177,8 @@ static int parse_content_length(const char *value)
 static int parse_multipart_header(AVIOContext *pb,
                             int* size,
                             const char* expected_boundary,
-                            void *log_ctx)
+                            void *log_ctx,
+                            int* pts)
 {
     char line[128];
     int found_content_type = 0;
@@ -227,6 +230,9 @@ static int parse_multipart_header(AVIOContext *pb,
         if (value==NULL || tag==NULL)
             break;
 
+        if (log_ctx)
+            av_log(log_ctx, AV_LOG_DEBUG,"mpjpegdec.cccccc %s : %s\n", tag, value);
+
         if (!av_strcasecmp(tag, "Content-type")) {
             if (av_strcasecmp(value, "image/jpeg")) {
                 if (log_ctx)
@@ -243,6 +249,8 @@ static int parse_multipart_header(AVIOContext *pb,
                 av_log(log_ctx, AV_LOG_WARNING,
                            "Invalid Content-Length value : %s\n",
                            value);
+        } else if (!av_strcasecmp(tag, "X-Timestamp")) {
+            *pts = parse_content_length(value);
         }
     }
 
@@ -298,6 +306,7 @@ static int mpjpeg_read_packet(AVFormatContext *s, AVPacket *pkt)
 {
     int size;
     int ret;
+    int pts;
 
     MPJPEGDemuxContext *mpjpeg = s->priv_data;
     if (mpjpeg->boundary == NULL) {
@@ -320,7 +329,7 @@ static int mpjpeg_read_packet(AVFormatContext *s, AVPacket *pkt)
         mpjpeg->searchstr_len = strlen(mpjpeg->searchstr);
     }
 
-    ret = parse_multipart_header(s->pb, &size, mpjpeg->boundary, s);
+    ret = parse_multipart_header(s->pb, &size, mpjpeg->boundary, s, &pts);
 
 
     if (ret < 0)
@@ -329,6 +338,13 @@ static int mpjpeg_read_packet(AVFormatContext *s, AVPacket *pkt)
     if (size > 0) {
         /* size has been provided to us in MIME header */
         ret = av_get_packet(s->pb, pkt, size);
+//        pkt->pts = pts;
+        AVRational src_tb = {1, 1000}; // 原始时间基
+        AVRational dst_tb = {1, 30}; // 目标时间基
+        pkt->pts = av_rescale_q(pts, src_tb, dst_tb);
+        pkt->dts = pkt->pts;
+        pkt->duration = av_rescale_q(1, dst_tb, dst_tb);
+        pkt->pos = -1;
     } else {
         /* no size was given -- we read until the next boundary or end-of-file */
         int remaining = 0, len;
@@ -338,7 +354,7 @@ static int mpjpeg_read_packet(AVFormatContext *s, AVPacket *pkt)
         pkt->data = NULL;
         pkt->size = 0;
         pkt->pos  = avio_tell(s->pb);
-
+        pkt->pts = pts;
         /* we may need to return as much as all we've read back to the buffer */
         ffio_ensure_seekback(s->pb, read_chunk);
 
