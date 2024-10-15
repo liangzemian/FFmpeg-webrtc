@@ -338,7 +338,16 @@ static int mpjpeg_read_packet(AVFormatContext *s, AVPacket *pkt)
     if (size > 0) {
         /* size has been provided to us in MIME header */
         ret = av_get_packet(s->pb, pkt, size);
-//        pkt->pts = pts;
+
+        // 获取 packet-buffering 参数
+        AVDictionaryEntry *entry = av_dict_get(s->metadata, "packet-buffering", NULL, 0);
+        if (entry) {
+            av_log(s, AV_LOG_INFO, "av_dict_set_int_packet-buffering222: %s\n", entry->value);
+            int realtime = (int) strtol(entry->value, NULL, 10);
+            if (realtime == 0)
+                return ret;
+        }
+
         AVRational src_tb = {1, 1000}; // 原始时间基
         AVRational dst_tb = {1, 30}; // 目标时间基
         pkt->pts = av_rescale_q(pts, src_tb, dst_tb);
