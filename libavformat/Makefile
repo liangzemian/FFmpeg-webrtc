@@ -33,6 +33,7 @@ OBJS = allformats.o         \
        utils.o              \
        avc.o                \
        ijkutils.o           \
+       webrtc_demuxer.o
 
 OBJS-$(HAVE_LIBC_MSVCRT)                 += file_open.o
 
