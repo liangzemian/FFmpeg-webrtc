@@ -469,7 +469,7 @@ Developer options (useful when working on FFmpeg itself):
   --enable-linux-perf      enable Linux Performance Monitor API
 
 
---extra-cflags=-I/path/libLebConnection/include --extra-ldflags=-L/path/libLebConnection/lib/ --extra-libs='-lLebConnection_so -lc++_shared
+--extra-cflags=-I/path/libLebConnection/include --extra-ldflags=-L/path/libLebConnection/lib/ --extra-libs='-lLebConnection -lc++_shared
 
 NOTE: Object files are built at the place where configure is launched.
 EOF
