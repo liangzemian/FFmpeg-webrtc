@@ -49,4 +49,6 @@ int ff_http_do_new_request(URLContext *h, const char *uri);
 
 int ff_http_averror(int status_code, int default_averror);
 
+const char* ff_http_get_new_location(URLContext *h);
+
 #endif /* AVFORMAT_HTTP_H */

@@ -26,6 +26,7 @@
 #include "rdt.h"
 #include "url.h"
 #include "version.h"
+#include "mux.h"
 
 /* (de)muxers */
 extern AVOutputFormat ff_a64_muxer;
@@ -484,6 +485,8 @@ extern AVInputFormat  ff_libgme_demuxer;
 extern AVInputFormat  ff_libmodplug_demuxer;
 extern AVInputFormat  ff_libopenmpt_demuxer;
 extern AVInputFormat  ff_webrtc_demuxer;
+
+extern FFOutputFormat ff_whip_muxer;
 
 #include "libavformat/muxer_list.c"
 #include "libavformat/demuxer_list.c"
