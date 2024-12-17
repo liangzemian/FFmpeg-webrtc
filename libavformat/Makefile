@@ -653,5 +653,3 @@ TOOLS     = aviocat                                                     \
             probetest                                                   \
             seek_print                                                  \
             sidxindex                                                   \
-
-OBJS-$(CONFIG_WEBRTC_DEMUXER)           += webrtc_demuxer.o

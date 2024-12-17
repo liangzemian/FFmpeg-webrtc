@@ -3644,7 +3644,9 @@ find_filters_extern(){
 }
 
 FILTER_LIST=$(find_filters_extern libavfilter/allfilters.c)
+OUTDEV_LIST=$(find_things_extern muxer FFOutputFormat libavdevice/alldevices.c outdev)
 OUTDEV_LIST=$(find_things_extern muxer AVOutputFormat libavdevice/alldevices.c outdev)
+MUXER_LIST=$(find_things_extern muxer FFOutputFormat libavformat/allformats.c)
 INDEV_LIST=$(find_things_extern demuxer AVInputFormat libavdevice/alldevices.c indev)
 MUXER_LIST=$(find_things_extern muxer AVOutputFormat libavformat/allformats.c)
 DEMUXER_LIST=$(find_things_extern demuxer AVInputFormat libavformat/allformats.c)
