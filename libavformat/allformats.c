@@ -26,7 +26,7 @@
 #include "rdt.h"
 #include "url.h"
 #include "version.h"
-#include "mux.h"
+#include "internal.h"
 
 /* (de)muxers */
 extern AVOutputFormat ff_a64_muxer;

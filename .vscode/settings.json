@@ -2,7 +2,6 @@
     "files.associations": {
         "intreadwrite.h": "c",
         "internal.h": "c",
-        "mux.h": "c",
         "parseutils.h": "c",
         "avio.h": "c",
         "avformat.h": "c",
