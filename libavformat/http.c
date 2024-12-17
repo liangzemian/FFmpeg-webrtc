@@ -128,6 +128,7 @@ typedef struct HTTPContext {
     int is_connected_server;
     char *tcp_hook;
     char * app_ctx_intptr;
+    char *new_location;
     AVApplicationContext *app_ctx;
 } HTTPContext;
 
